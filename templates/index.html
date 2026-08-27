@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',
+filename='css/estilos.css') }}">
+    <title>Hola Flask</title>
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>Hola Flask + Jinja</h1>
+        <p>
+            Esta es mi primera aplicación Web utilizando
+            Python y Flask.
+        </p>
+        <form action="/saludar" method="POST">
+            <!-- =============================================
+NOMBRE
+============================================= -->
+            <label for="nombre">
+                Dame tu nombre:
+            </label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <!-- =============================================
+PASATIEMPOS
+============================================= -->
+            <h2>Selecciona tus pasatiempos</h2>
+            <div class="pasatiempos">
+                <!-- DEPORTIVOS -->
+                <div class="categoria">
+                    <h3>Deportivos</h3>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Fútbol">
+                        Fútbol
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Béisbol">
+
+                        Béisbol
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Ciclismo">
+
+                        Ciclismo
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Caminar">
+
+                        Caminar
+                    </label>
+                </div>
+                <!-- CULTURALES -->
+                <div class="categoria">
+                    <h3>Culturales</h3>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Lectura">
+
+                        Lectura
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Música">
+
+                        Música
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Pintura">
+
+                        Pintura
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Teatro">
+
+                        Teatro
+                    </label>
+                </div>
+                <!-- ESPARCIMIENTO -->
+                <div class="categoria">
+                    <h3>Esparcimiento</h3>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Cine">
+
+                        Cine
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Videojuegos">
+
+                        Videojuegos
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Viajar">
+
+                        Viajar
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Series">
+
+                        Series
+                    </label>
+                </div>
+                <!-- SOCIALES -->
+                <div class="categoria">
+                    <h3>Sociales</h3>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Reuniones">
+
+                        Reuniones
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Fiestas">
+
+                        Fiestas
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Convivir">
+
+                        Convivir
+                    </label>
+                    <label>
+                        <input type="checkbox" name="pasatiempos" value="Redes sociales">
+
+                        Redes sociales
+                    </label>
+                </div>
+            </div>
+            <!-- =============================================
+              TEXTO LIBRE
+            ============================================= -->
+            <label for="me_gusta" class="titulo-gusta">Que te gusta?</label>
+            <input type="text" id="me_gusta" name="me_gusta" placeholder="Escribe lo que te gusta hacer...">
+
+            <button type="submit">
+                Saludar
+            </button>
+        </form>
+    </div>
+</body>
+
+</html>

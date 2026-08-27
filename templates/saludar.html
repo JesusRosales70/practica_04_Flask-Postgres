@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saludar</title>
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>¡Hola {{ nombre }}!</h1>
+        <h2>
+            Tus pasatiempos son:
+        </h2>
+        <ul>
+            {% for pasatiempo in pasatiempos %}
+            <li>
+                {{ pasatiempo }}
+            </li>
+            {% endfor %}
+        </ul>
+        <h2>
+            Lo que más te gusta hacer:
+        </h2>
+        <p>
+            {{ me_gusta }}
+        </p>
+        <p>
+            Bienvenido a tu primera aplicación
+            Web con Flask y Jinja.
+        </p>
+        <a href="/">Regresar</a>
+    </div>
+</body>
+
+</html>
