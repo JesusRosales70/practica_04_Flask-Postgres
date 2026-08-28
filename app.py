@@ -4,12 +4,10 @@ import os
 
 app = Flask(__name__)
 
-# Ruta absoluta de la base de datos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RUTA_BD = os.path.join(BASE_DIR, "database", "practica.db")
 
 def crear_base_datos():
-    # Se añade la sangría correcta dentro de la función
     os.makedirs(os.path.join(BASE_DIR, "database"), exist_ok=True)
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
@@ -17,7 +15,11 @@ def crear_base_datos():
         CREATE TABLE IF NOT EXISTS alumnos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
+            carrera TEXT,
+            semestre INTEGER,
+            turno TEXT,
             pasatiempos TEXT,
+            nivel_prog TEXT,
             me_gusta TEXT
         )
     """)
@@ -30,25 +32,34 @@ def inicio():
 
 @app.route("/saludar", methods=["POST"])
 def f_saludar():
-    nombre = request.form["nombre"]
+    nombre = request.form.get("nombre")
+    carrera = request.form.get("carrera")
+    semestre = request.form.get("semestre")
+    turno = request.form.get("turno")
     pasatiempos = request.form.getlist("pasatiempos")
-    me_gusta = request.form["me_gusta"]
+    nivel_prog = request.form.get("nivel_prog")
+    me_gusta = request.form.get("me_gusta")
+
     pasatiempos_texto = ", ".join(pasatiempos)
 
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     cursor.execute("""
         INSERT INTO alumnos
-        (nombre, pasatiempos, me_gusta)
-        VALUES (?, ?, ?)
-    """, (nombre, pasatiempos_texto, me_gusta))
+        (nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (nombre, carrera, semestre, turno, pasatiempos_texto, nivel_prog, me_gusta))
     conexion.commit()
     conexion.close()
 
     return render_template(
         "saludar.html",
         nombre=nombre,
+        carrera=carrera,
+        semestre=semestre,
+        turno=turno,
         pasatiempos=pasatiempos,
+        nivel_prog=nivel_prog,
         me_gusta=me_gusta
     )
 
@@ -56,18 +67,16 @@ def f_saludar():
 def listar_alumnos():
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM alumnos ORDER BY id")
+    cursor.execute("SELECT id, nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta FROM alumnos ORDER BY id")
     alumnos = cursor.fetchall()
     conexion.close()
-    
+
     return render_template(
         "listar_alumnos.html",
         alumnos=alumnos
     )
 
-# Inicializar la base de datos al arrancar
 crear_base_datos()
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # app.run(host="0.0.0.0", port=5000, debug=True)

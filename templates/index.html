@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Práctica 02 - Registro Escolar</title>
+    <title>Registro de Alumnos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
-
 <body>
     <div class="contenedor">
         <h1>Registro de alumnos</h1>
         <form action="/saludar" method="POST">
             
-            <!-- DATOS PERSONALES Y ACADÉMICOS -->
             <label for="nombre">Nombre completo:</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Pérez" required>
+            <input type="text" id="nombre" name="nombre" required>
 
-            <label for="carrera">Carrera / Especialidad:</label>
+            <label for="carrera">Carrera:</label>
             <select id="carrera" name="carrera" required>
                 <option value="" disabled selected>Selecciona tu carrera</option>
                 <option value="Sistemas Computacionales">Sistemas Computacionales</option>
@@ -26,21 +23,19 @@
                 <option value="Mecatrónica">Mecatrónica</option>
             </select>
 
-            <label for="semestre">Semestre actual:</label>
-            <input type="number" id="semestre" name="semestre" min="1" max="12" placeholder="1-12" required>
+            <label for="semestre">Semestre:</label>
+            <input type="number" id="semestre" name="semestre" min="1" max="12" required>
 
-            <!-- TURNO (RADIO BUTTONS) -->
             <h3>Turno</h3>
             <div class="grupo-inline">
                 <label class="label-inline">
                     <input type="radio" name="turno" value="Matutino" checked> Matutino
                 </label>
                 <label class="label-inline">
-                    <input type="radio" name="turno" value="Vesperino"> Vespertino
+                    <input type="radio" name="turno" value="Vespertino"> Vespertino
                 </label>
             </div>
 
-            <!-- PASATIEMPOS (CHECKBOXES) -->
             <h3>Pasatiempos</h3>
             <div class="pasatiempos">
                 <label><input type="checkbox" name="pasatiempos" value="Fútbol"> Fútbol</label>
@@ -49,25 +44,20 @@
                 <label><input type="checkbox" name="pasatiempos" value="Música"> Música</label>
             </div>
 
-            <!-- HABILIDADES TECNOLÓGICAS -->
-            <label for="nivel_prog">Nivel de experiencia en programación:</label>
+            <label for="nivel_prog">Nivel de programación:</label>
             <select id="nivel_prog" name="nivel_prog">
                 <option value="Principiante">Principiante</option>
                 <option value="Intermedio">Intermedio</option>
                 <option value="Avanzado">Avanzado</option>
             </select>
 
-            <!-- DESCRIPCIÓN LIBRE -->
             <h3>¿Qué me gusta hacer?</h3>
-            <textarea name="me_gusta" rows="3" placeholder="Describe brevemente tus gustos o aficiones..." required></textarea>
+            <textarea name="me_gusta" rows="3" required></textarea>
 
-            <button type="submit">Registrar Alumno</button>
+            <button type="submit">Registrar</button>
         </form>
 
-        <p>
-            <a href="/alumnos">Ver alumnos registrados</a>
-        </p>
+        <p><a href="/alumnos">Ver alumnos registrados</a></p>
     </div>
 </body>
-
 </html>
