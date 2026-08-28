@@ -4,33 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saludar</title>
+    <title>Registro realizado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
 
 <body>
     <div class="contenedor">
         <h1>¡Hola {{ nombre }}!</h1>
-        <h2>
-            Tus pasatiempos son:
-        </h2>
+        <p>Tu información fue registrada.</p>
+        <h3>Pasatiempos</h3>
         <ul>
             {% for pasatiempo in pasatiempos %}
-            <li>
-                {{ pasatiempo }}
-            </li>
+            <li>{{ pasatiempo }}</li>
             {% endfor %}
         </ul>
-        <h2>
-            Lo que más te gusta hacer:
-        </h2>
+        <h3>Me gusta</h3>
+        <p>{{ me_gusta }}</p>
         <p>
-            {{ me_gusta }}
+            <a href="/">Registrar otro alumno</a>
         </p>
         <p>
-            Bienvenido a tu primera aplicación
-            Web con Flask y Jinja.
+            <a href="/alumnos">Ver alumnos registrados</a>
         </p>
-        <a href="/">Regresar</a>
     </div>
 </body>
 

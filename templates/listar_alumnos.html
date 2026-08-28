@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de alumnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>Alumnos registrados</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Pasatiempos</th>
+                    <th>Me gusta</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alumno in alumnos %}
+                <tr>
+                    <td>{{ alumno[0] }}</td>
+                    <td>{{ alumno[1] }}</td>
+                    <td>{{ alumno[2] }}</td>
+                    <td>{{ alumno[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            <a href="/">Regresar al formulario</a>
+        </p>
+    </div>
+</body>
+
+</html>
