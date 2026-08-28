@@ -10,16 +10,33 @@
 
 <body>
     <div class="contenedor">
-        <h1>¡Hola {{ nombre }}!</h1>
-        <p>Tu información fue registrada.</p>
+        <h1>¡Hola, {{ nombre }}!</h1>
+        <p>Tu información fue registrada exitosamente.</p>
+
+        <!-- DATOS ACADÉMICOS -->
+        <h3>Información Académica</h3>
+        <p><strong>Carrera:</strong> {{ carrera }}</p>
+        <p><strong>Semestre:</strong> {{ semestre }}</p>
+        <p><strong>Turno:</strong> {{ turno }}</p>
+        <p><strong>Nivel de programación:</strong> {{ nivel_prog }}</p>
+
+        <!-- PASATIEMPOS -->
         <h3>Pasatiempos</h3>
-        <ul>
-            {% for pasatiempo in pasatiempos %}
-            <li>{{ pasatiempo }}</li>
-            {% endfor %}
-        </ul>
-        <h3>Me gusta</h3>
+        {% if pasatiempos %}
+            <ul>
+                {% for pasatiempo in pasatiempos %}
+                <li>{{ pasatiempo }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p><em>No seleccionaste pasatiempos.</em></p>
+        {% endif %}
+
+        <!-- DESCRIPCIÓN LIBRE -->
+        <h3>Lo que te gusta hacer</h3>
         <p>{{ me_gusta }}</p>
+
+        <!-- ENLACES DE NAVEGACIÓN -->
         <p>
             <a href="/">Registrar otro alumno</a>
         </p>

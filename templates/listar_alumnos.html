@@ -11,12 +11,18 @@
 <body>
     <div class="contenedor">
         <h1>Alumnos registrados</h1>
+
+        {% if alumnos %}
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
+                    <th>Carrera</th>
+                    <th>Semestre</th>
+                    <th>Turno</th>
                     <th>Pasatiempos</th>
+                    <th>Nivel Prog.</th>
                     <th>Me gusta</th>
                 </tr>
             </thead>
@@ -27,10 +33,18 @@
                     <td>{{ alumno[1] }}</td>
                     <td>{{ alumno[2] }}</td>
                     <td>{{ alumno[3] }}</td>
+                    <td>{{ alumno[4] }}</td>
+                    <td>{{ alumno[5] }}</td>
+                    <td>{{ alumno[6] }}</td>
+                    <td>{{ alumno[7] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <p>No hay alumnos registrados en este momento.</p>
+        {% endif %}
+
         <p>
             <a href="/">Regresar al formulario</a>
         </p>
