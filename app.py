@@ -1,28 +1,44 @@
 from flask import Flask, render_template, request
-import sqlite3
+import pymysql
 import os
 
 app = Flask(__name__)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-RUTA_BD = os.path.join(BASE_DIR, "database", "practica.db")
+# =========================================================
+# CONFIGURACIÓN DE CONEXIÓN A MYSQL
+# En local usará los valores por defecto. En la nube tomará las variables de entorno.
+# =========================================================
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_USER = os.environ.get("DB_USER", "root")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")  # Agrega tu contraseña local si usas una
+DB_NAME = os.environ.get("DB_NAME", "practica_db")
+DB_PORT = int(os.environ.get("DB_PORT", 3306))
+
+def obtener_conexion():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        port=DB_PORT,
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 def crear_base_datos():
-    os.makedirs(os.path.join(BASE_DIR, "database"), exist_ok=True)
-    conexion = sqlite3.connect(RUTA_BD)
-    cursor = conexion.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS alumnos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            carrera TEXT,
-            semestre INTEGER,
-            turno TEXT,
-            pasatiempos TEXT,
-            nivel_prog TEXT,
-            me_gusta TEXT
-        )
-    """)
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS alumnos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                carrera VARCHAR(100),
+                semestre INT,
+                turno VARCHAR(20),
+                pasatiempos VARCHAR(255),
+                nivel_prog VARCHAR(50),
+                me_gusta TEXT
+            )
+        """)
     conexion.commit()
     conexion.close()
 
@@ -42,13 +58,15 @@ def f_saludar():
 
     pasatiempos_texto = ", ".join(pasatiempos)
 
-    conexion = sqlite3.connect(RUTA_BD)
-    cursor = conexion.cursor()
-    cursor.execute("""
-        INSERT INTO alumnos
-        (nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (nombre, carrera, semestre, turno, pasatiempos_texto, nivel_prog, me_gusta))
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        # En MySQL los marcadores de posición son %s en lugar de ?
+        sql = """
+            INSERT INTO alumnos
+            (nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql, (nombre, carrera, semestre, turno, pasatiempos_texto, nivel_prog, me_gusta))
     conexion.commit()
     conexion.close()
 
@@ -65,18 +83,27 @@ def f_saludar():
 
 @app.route("/alumnos")
 def listar_alumnos():
-    conexion = sqlite3.connect(RUTA_BD)
-    cursor = conexion.cursor()
-    cursor.execute("SELECT id, nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta FROM alumnos ORDER BY id")
-    alumnos = cursor.fetchall()
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT id, nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta FROM alumnos ORDER BY id")
+        alumnos_dict = cursor.fetchall()
     conexion.close()
+
+    # Formatea los datos a tuplas para mantener compatibilidad con listar_alumnos.html
+    alumnos = [
+        (a["id"], a["nombre"], a["carrera"], a["semestre"], a["turno"], a["pasatiempos"], a["nivel_prog"], a["me_gusta"])
+        for a in alumnos_dict
+    ]
 
     return render_template(
         "listar_alumnos.html",
         alumnos=alumnos
     )
 
-crear_base_datos()
-
 if __name__ == "__main__":
+    try:
+        crear_base_datos()
+    except Exception as e:
+        print(f"Aviso BD: Recuerda crear primero la base de datos en MySQL. Detalle: {e}")
+
     app.run(debug=True)
