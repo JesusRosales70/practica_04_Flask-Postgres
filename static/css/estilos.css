@@ -20,12 +20,9 @@ CONTENEDOR PRINCIPAL
     max-width: 1000px;
     margin: auto;
     background-color: white;
-
     padding: 35px;
     border-radius: 12px;
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.10);
-
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
 }
 
 /* =========================================
@@ -65,7 +62,6 @@ legend {
 
 .fila {
     display: flex;
-
     gap: 20px;
     margin-bottom: 18px;
 }
@@ -145,7 +141,7 @@ button:hover,
 }
 
 /* =========================================
-TABLAS
+TABLAS (VISTA MOSTRAR CLIENTE)
 ========================================= */
 table {
     width: 100%;
@@ -156,7 +152,6 @@ table {
 th,
 td {
     border: 1px solid #dddddd;
-
     padding: 12px;
     text-align: left;
 }
@@ -164,6 +159,52 @@ td {
 th {
     width: 30%;
     background-color: #f1f1f1;
+}
+
+/* =========================================
+TABLA DE CLIENTES (LISTA COMPLETA)
+========================================= */
+.tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+.tabla-contenedor table {
+    min-width: 1600px;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+
+.tabla-contenedor th {
+    white-space: nowrap;
+    width: auto;
+    background-color: #f4f4f4 !important;
+    color: #222222 !important;
+    font-weight: bold;
+    padding: 10px 12px;
+    border: 1px solid #dddddd;
+}
+
+.tabla-contenedor td {
+    color: #111111 !important;
+    background-color: #ffffff !important;
+    padding: 10px 12px;
+    border: 1px solid #dddddd;
+    white-space: nowrap;
+}
+
+/* =========================================
+MENSAJES DE ESTADO
+========================================= */
+.mensaje {
+    text-align: center;
+    padding: 30px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 20px;
 }
 
 /* =========================================
@@ -187,28 +228,4 @@ DISEÑO RESPONSIVO
         flex-direction: column;
         gap: 8px;
     }
-}
-
-/* =========================================
-TABLA DE CLIENTES
-========================================= */
-.tabla-contenedor {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.tabla-contenedor table {
-    min-width: 1600px;
-}
-
-.tabla-contenedor th {
-    white-space: nowrap;
-}
-
-.mensaje {
-    text-align: center;
-    padding: 30px;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    margin-top: 20px;
 }
