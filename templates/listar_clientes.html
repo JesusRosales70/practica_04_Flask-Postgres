@@ -5,9 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Clientes</title>
-    <link rel="stylesheet" href="{{ url_for('static',
-filename='css/estilos.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
 
 <body>
@@ -16,13 +14,13 @@ filename='css/estilos.css') }}">
         <p class="subtitulo">
             Registros almacenados en MySQL
         </p>
+
         <!-- ========================================= -->
         <!-- COMPROBAR SI EXISTEN CLIENTES -->
         <!-- ========================================= -->
         {% if clientes %}
         <!-- ===================================== -->
         <!-- TABLA DE CLIENTES -->
-
         <!-- ===================================== -->
         <div class="tabla-contenedor">
             <table>
@@ -51,52 +49,21 @@ filename='css/estilos.css') }}">
                     <!-- ================================= -->
                     {% for cliente in clientes %}
                     <tr>
-                        <td>
-                            {{ cliente[0] }}
-                        </td>
-                        <td>
-                            {{ cliente[1] }}
-                        </td>
-                        <td>
-                            {{ cliente[2] }}
-                        </td>
-                        <td>
-                            {{ cliente[3] }}
-                        </td>
-                        <td>
-                            {{ cliente[4] }}
-                        </td>
-                        <td>
-
-                            {{ cliente[5] }}
-                        </td>
-                        <td>
-                            {{ cliente[6] }}
-                        </td>
-                        <td>
-                            {{ cliente[7] }}
-                        </td>
-                        <td>
-                            {{ cliente[8] }}
-                        </td>
-                        <td>
-                            {{ cliente[9] }}
-                        </td>
-                        <td>
-                            {{ cliente[10] }}
-                        </td>
-                        <td>
-                            {{ cliente[11] }}
-                        </td>
-                        <td>
-                            {{ cliente[12] }}
-                        </td>
-                        <td>
-                            $ {{ cliente[13] }}
-                        </td>
-                        <td>
-                            {{ cliente[14] }}
-                        </td>
+                        <td>{{ cliente.id }}</td>
+                        <td>{{ cliente.nombre }}</td>
+                        <td>{{ cliente.apellido_paterno }}</td>
+                        <td>{{ cliente.apellido_materno }}</td>
+                        <td>{{ cliente.fecha_nacimiento }}</td>
+                        <td>{{ cliente.genero }}</td>
+                        <td>{{ cliente.correo }}</td>
+                        <td>{{ cliente.telefono }}</td>
+                        <td>{{ cliente.estado }}</td>
+                        <td>{{ cliente.ciudad }}</td>
+                        <td>{{ cliente.codigo_postal }}</td>
+                        <td>{{ cliente.tipo_cliente }}</td>
+                        <td>{{ cliente.intereses }}</td>
+                        <td>$ {{ cliente.limite_credito }}</td>
+                        <td>{{ cliente.observaciones }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -109,12 +76,11 @@ filename='css/estilos.css') }}">
         <div class="mensaje">
             <h2>No hay clientes registrados</h2>
             <p>
-                La tabla de clientes todavía
-                no contiene registros.
+                La tabla de clientes todavía no contiene registros.
             </p>
-
         </div>
         {% endif %}
+
         <!-- ========================================= -->
         <!-- BOTONES -->
         <!-- ========================================= -->
