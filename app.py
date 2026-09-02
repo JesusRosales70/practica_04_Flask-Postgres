@@ -104,6 +104,8 @@ if __name__ == "__main__":
     try:
         crear_base_datos()
     except Exception as e:
-        print(f"Aviso BD: Recuerda crear primero la base de datos en MySQL. Detalle: {e}")
+        print(f"Aviso BD: {e}")
 
-    app.run(debug=True)
+    # Render define la variable PORT de forma dinámica
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
