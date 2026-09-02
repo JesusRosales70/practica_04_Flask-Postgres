@@ -6,11 +6,11 @@ app = Flask(__name__)
 
 # =========================================================
 # CONFIGURACIÓN DE CONEXIÓN A MYSQL
-# En local usará los valores por defecto. En la nube tomará las variables de entorno.
+# En local usa valores por defecto; en la nube toma las variables de entorno.
 # =========================================================
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "root")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")  # Agrega tu contraseña local si usas una
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 DB_NAME = os.environ.get("DB_NAME", "practica_db")
 DB_PORT = int(os.environ.get("DB_PORT", 3306))
 
@@ -24,88 +24,109 @@ def obtener_conexion():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-def crear_base_datos():
+def crear_tabla_clientes():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS alumnos (
+            CREATE TABLE IF NOT EXISTS clientes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 nombre VARCHAR(100) NOT NULL,
-                carrera VARCHAR(100),
-                semestre INT,
-                turno VARCHAR(20),
-                pasatiempos VARCHAR(255),
-                nivel_prog VARCHAR(50),
-                me_gusta TEXT
+                apellido_paterno VARCHAR(100),
+                apellido_materno VARCHAR(100),
+                fecha_nacimiento DATE,
+                genero VARCHAR(20),
+                correo VARCHAR(100),
+                telefono VARCHAR(20),
+                estado VARCHAR(50),
+                ciudad VARCHAR(50),
+                codigo_postal VARCHAR(10),
+                tipo_cliente VARCHAR(50),
+                intereses TEXT,
+                limite_credito DECIMAL(10,2),
+                observaciones TEXT
             )
         """)
     conexion.commit()
     conexion.close()
 
+# =========================================================
+# RUTAS DE LA APLICACIÓN
+# =========================================================
 @app.route("/")
 def inicio():
     return render_template("index.html")
 
-@app.route("/saludar", methods=["POST"])
-def f_saludar():
+@app.route("/mostrar_cliente", methods=["POST"])
+def mostrar_cliente():
+    # Recepción de datos del formulario
     nombre = request.form.get("nombre")
-    carrera = request.form.get("carrera")
-    semestre = request.form.get("semestre")
-    turno = request.form.get("turno")
-    pasatiempos = request.form.getlist("pasatiempos")
-    nivel_prog = request.form.get("nivel_prog")
-    me_gusta = request.form.get("me_gusta")
+    apellido_paterno = request.form.get("apellido_paterno")
+    apellido_materno = request.form.get("apellido_materno")
+    fecha_nacimiento = request.form.get("fecha_nacimiento")
+    genero = request.form.get("genero", "")
+    correo = request.form.get("correo")
+    telefono = request.form.get("telefono")
+    estado = request.form.get("estado")
+    ciudad = request.form.get("ciudad")
+    codigo_postal = request.form.get("codigo_postal")
+    tipo_cliente = request.form.get("tipo_cliente")
+    intereses = request.form.getlist("intereses")
+    intereses_texto = ", ".join(intereses)
+    limite_credito = request.form.get("limite_credito")
+    observaciones = request.form.get("observaciones")
 
-    pasatiempos_texto = ", ".join(pasatiempos)
-
+    # Guardar en MySQL
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        # En MySQL los marcadores de posición son %s en lugar de ?
         sql = """
-            INSERT INTO alumnos
-            (nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO clientes 
+            (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, correo, telefono, estado, ciudad, codigo_postal, tipo_cliente, intereses, limite_credito, observaciones)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(sql, (nombre, carrera, semestre, turno, pasatiempos_texto, nivel_prog, me_gusta))
+        cursor.execute(sql, (
+            nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero,
+            correo, telefono, estado, ciudad, codigo_postal, tipo_cliente,
+            intereses_texto, limite_credito, observaciones
+        ))
     conexion.commit()
     conexion.close()
 
     return render_template(
-        "saludar.html",
+        "mostrar_cliente.html",
         nombre=nombre,
-        carrera=carrera,
-        semestre=semestre,
-        turno=turno,
-        pasatiempos=pasatiempos,
-        nivel_prog=nivel_prog,
-        me_gusta=me_gusta
+        apellido_paterno=apellido_paterno,
+        apellido_materno=apellido_materno,
+        fecha_nacimiento=fecha_nacimiento,
+        genero=genero,
+        correo=correo,
+        telefono=telefono,
+        estado=estado,
+        ciudad=ciudad,
+        codigo_postal=codigo_postal,
+        tipo_cliente=tipo_cliente,
+        intereses=intereses,
+        limite_credito=limite_credito,
+        observaciones=observaciones
     )
 
-@app.route("/alumnos")
-def listar_alumnos():
+@app.route("/clientes")
+def listar_clientes():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT id, nombre, carrera, semestre, turno, pasatiempos, nivel_prog, me_gusta FROM alumnos ORDER BY id")
-        alumnos_dict = cursor.fetchall()
+        cursor.execute("SELECT * FROM clientes ORDER BY id")
+        clientes = cursor.fetchall()
     conexion.close()
 
-    # Formatea los datos a tuplas para mantener compatibilidad con listar_alumnos.html
-    alumnos = [
-        (a["id"], a["nombre"], a["carrera"], a["semestre"], a["turno"], a["pasatiempos"], a["nivel_prog"], a["me_gusta"])
-        for a in alumnos_dict
-    ]
+    return render_template("listar_clientes.html", clientes=clientes)
 
-    return render_template(
-        "listar_alumnos.html",
-        alumnos=alumnos
-    )
-
+# =========================================================
+# EJECUCIÓN DEL SERVIDOR
+# =========================================================
 if __name__ == "__main__":
     try:
-        crear_base_datos()
+        crear_tabla_clientes()
     except Exception as e:
         print(f"Aviso BD: {e}")
 
-    # Render define la variable PORT de forma dinámica
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
