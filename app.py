@@ -122,11 +122,14 @@ def listar_clientes():
 # =========================================================
 # EJECUCIÓN DEL SERVIDOR
 # =========================================================
-if __name__ == "__main__":
+# Añade esta línea justo después de definir app = Flask(__name__)
+app = Flask(__name__)
+
+with app.app_context():
     try:
         crear_tabla_clientes()
     except Exception as e:
-        print(f"Aviso BD: {e}")
+        print(f"Error al verificar la tabla: {e}")
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
