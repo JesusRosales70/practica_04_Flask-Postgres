@@ -49,6 +49,13 @@ def crear_tabla_clientes():
     conexion.commit()
     conexion.close()
 
+# Ejecuta la verificación de la tabla al iniciar la app
+with app.app_context():
+    try:
+        crear_tabla_clientes()
+    except Exception as e:
+        print(f"Error al verificar la tabla: {e}")
+
 # =========================================================
 # RUTAS DE LA APLICACIÓN
 # =========================================================
@@ -112,23 +119,19 @@ def mostrar_cliente():
 @app.route("/clientes")
 def listar_clientes():
     conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM clientes ORDER BY id")
-        clientes = cursor.fetchall()
-    conexion.close()
+    try:
+        with conexion.cursor() as cursor:
+            # Trae todos los campos de clientes
+            cursor.execute("SELECT * FROM clientes ORDER BY 1")
+            clientes = cursor.fetchall()
+    finally:
+        conexion.close()
 
     return render_template("listar_clientes.html", clientes=clientes)
-# =========================================================
-# EJECUCIÓN DEL SERVIDOR
-# =========================================================
-# Añade esta línea justo después de definir app = Flask(__name__)
-app = Flask(__name__)
 
-with app.app_context():
-    try:
-        crear_tabla_clientes()
-    except Exception as e:
-        print(f"Error al verificar la tabla: {e}")
-
+# =========================================================
+# EJECUCIÓN DEL SERVIDOR LOCAL
+# =========================================================
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
