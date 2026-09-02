@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Clientes</title>
+    <link rel="stylesheet" href="{{ url_for('static',
+filename='css/estilos.css') }}">
+
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>Clientes Registrados</h1>
+        <p class="subtitulo">
+            Registros almacenados en MySQL
+        </p>
+        <!-- ========================================= -->
+        <!-- COMPROBAR SI EXISTEN CLIENTES -->
+        <!-- ========================================= -->
+        {% if clientes %}
+        <!-- ===================================== -->
+        <!-- TABLA DE CLIENTES -->
+
+        <!-- ===================================== -->
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Apellido paterno</th>
+                        <th>Apellido materno</th>
+                        <th>Fecha nacimiento</th>
+                        <th>Género</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Ciudad</th>
+                        <th>C.P.</th>
+                        <th>Tipo cliente</th>
+                        <th>Intereses</th>
+                        <th>Límite crédito</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ================================= -->
+                    <!-- RECORRER LOS REGISTROS CON JINJA -->
+                    <!-- ================================= -->
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>
+                            {{ cliente[0] }}
+                        </td>
+                        <td>
+                            {{ cliente[1] }}
+                        </td>
+                        <td>
+                            {{ cliente[2] }}
+                        </td>
+                        <td>
+                            {{ cliente[3] }}
+                        </td>
+                        <td>
+                            {{ cliente[4] }}
+                        </td>
+                        <td>
+
+                            {{ cliente[5] }}
+                        </td>
+                        <td>
+                            {{ cliente[6] }}
+                        </td>
+                        <td>
+                            {{ cliente[7] }}
+                        </td>
+                        <td>
+                            {{ cliente[8] }}
+                        </td>
+                        <td>
+                            {{ cliente[9] }}
+                        </td>
+                        <td>
+                            {{ cliente[10] }}
+                        </td>
+                        <td>
+                            {{ cliente[11] }}
+                        </td>
+                        <td>
+                            {{ cliente[12] }}
+                        </td>
+                        <td>
+                            $ {{ cliente[13] }}
+                        </td>
+                        <td>
+                            {{ cliente[14] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- ===================================== -->
+        <!-- NO HAY CLIENTES -->
+        <!-- ===================================== -->
+        <div class="mensaje">
+            <h2>No hay clientes registrados</h2>
+            <p>
+                La tabla de clientes todavía
+                no contiene registros.
+            </p>
+
+        </div>
+        {% endif %}
+        <!-- ========================================= -->
+        <!-- BOTONES -->
+        <!-- ========================================= -->
+        <div class="botones">
+            <a href="/" class="boton">
+                Registrar nuevo cliente
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

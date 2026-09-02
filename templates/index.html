@@ -1,63 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Alumnos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <title>Registro de Clientes</title>
+    <link rel="stylesheet" href="{{ url_for('static',
+filename='css/estilos.css') }}">
+
 </head>
+
 <body>
     <div class="contenedor">
-        <h1>Practica 03 - Registro de alumnos + MySQL</h1>
-        <form action="/saludar" method="POST">
-            
-            <label for="nombre">Nombre completo:</label>
-            <input type="text" id="nombre" name="nombre" required>
+        <h1>Registro de Clientes</h1>
+        <p class="subtitulo">
+            Aplicación Web Flask + MySQL
+        </p>
+        <form action="/mostrar_cliente" method="POST">
 
-            <label for="carrera">Carrera:</label>
-            <select id="carrera" name="carrera" required>
-                <option value="" disabled selected>Selecciona tu carrera</option>
-                <option value="Sistemas Computacionales">Sistemas Computacionales</option>
-                <option value="Tecnologías de la Información">Tecnologías de la Información</option>
-                <option value="Industrial">Ingeniería Industrial</option>
-                <option value="Mecatrónica">Mecatrónica</option>
-            </select>
+            <!-- ===================================== -->
+            <!-- DATOS PERSONALES -->
+            <!-- ===================================== -->
+            <fieldset>
+                <legend>Datos personales</legend>
+                <div class="fila">
+                    <div class="campo">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" required>
 
-            <label for="semestre">Semestre:</label>
-            <input type="number" id="semestre" name="semestre" min="1" max="12" required>
+                    </div>
+                    <div class="campo">
+                        <label>Apellido paterno</label>
+                        <input type="text" name="apellido_paterno" required>
 
-            <h3>Turno</h3>
-            <div class="grupo-inline">
-                <label class="label-inline">
-                    <input type="radio" name="turno" value="Matutino" checked> Matutino
-                </label>
-                <label class="label-inline">
-                    <input type="radio" name="turno" value="Vespertino"> Vespertino
-                </label>
+                    </div>
+                    <div class="campo">
+                        <label>Apellido materno</label>
+                        <input type="text" name="apellido_materno">
+
+                    </div>
+                </div>
+                <div class="fila">
+                    <div class="campo">
+                        <label>Fecha de nacimiento</label>
+                        <input type="date" name="fecha_nacimiento">
+
+                    </div>
+                    <div class="campo">
+                        <label>Género</label>
+                        <div class="opciones">
+                            <label>
+                                <input type="radio" name="genero" value="Mujer">
+                                Mujer
+                            </label>
+                            <label>
+                                <input type="radio" name="genero" value="Hombre">
+                                Hombre
+                            </label>
+
+                            <label>
+                                <input type="radio" name="genero" value="Otro">
+                                Otro
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <!-- ===================================== -->
+            <!-- CONTACTO -->
+            <!-- ===================================== -->
+            <fieldset>
+                <legend>Datos de contacto</legend>
+                <div class="fila">
+                    <div class="campo">
+                        <label>Correo electrónico</label>
+                        <input type="email" name="correo" placeholder="cliente@correo.com" required>
+
+                    </div>
+                    <div class="campo">
+                        <label>Teléfono</label>
+                        <input type="tel" name="telefono" placeholder="6181234567">
+
+                    </div>
+                </div>
+            </fieldset>
+            <!-- ===================================== -->
+            <!-- UBICACIÓN -->
+            <!-- ===================================== -->
+            <fieldset>
+                <legend>Ubicación</legend>
+                <div class="fila">
+                    <div class="campo">
+                        <label>Estado</label>
+                        <select name="estado">
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            <option value="Durango">
+                                Durango
+                            </option>
+                            <option value="Chihuahua">
+                                Chihuahua
+                            </option>
+                            <option value="Coahuila">
+                                Coahuila
+                            </option>
+                            <option value="Jalisco">
+                                Jalisco
+                            </option>
+                            <option value="Nuevo León">
+                                Nuevo León
+                            </option>
+                            <option value="Zacatecas">
+                                Zacatecas
+                            </option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Ciudad</label>
+                        <input type="text" name="ciudad">
+
+                    </div>
+                    <div class="campo">
+                        <label>Código postal</label>
+                        <input type="text" name="codigo_postal" maxlength="5">
+
+                    </div>
+                </div>
+            </fieldset>
+            <!-- ===================================== -->
+            <!-- INFORMACIÓN COMERCIAL -->
+            <!-- ===================================== -->
+            <fieldset>
+                <legend>Información comercial</legend>
+                <div class="fila">
+                    <div class="campo">
+                        <label>Tipo de cliente</label>
+                        <select name="tipo_cliente">
+                            <option value="Regular">
+                                Regular
+                            </option>
+
+                            <option value="Preferente">
+                                Preferente
+                            </option>
+                            <option value="Empresarial">
+                                Empresarial
+                            </option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Límite de crédito</label>
+                        <input type="number" name="limite_credito" min="0" step="0.01" placeholder="0.00">
+
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>Intereses</label>
+                    <div class="opciones">
+                        <label>
+                            <input type="checkbox" name="intereses" value="Tecnología">
+                            Tecnología
+                        </label>
+                        <label>
+                            <input type="checkbox" name="intereses" value="Deportes">
+                            Deportes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="intereses" value="Hogar">
+                            Hogar
+                        </label>
+                        <label>
+                            <input type="checkbox" name="intereses" value="Educación">
+                            Educación
+                        </label>
+
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>Observaciones</label>
+                    <textarea name="observaciones" rows="4" maxlength="250" placeholder="Comentarios acerca del
+
+cliente"></textarea>
+                </div>
+            </fieldset>
+            <div class="botones">
+                <button type="submit">
+                    Mostrar información
+                </button>
+                <button type="reset" class="secundario">
+                    Limpiar
+                </button>
             </div>
-
-            <h3>Pasatiempos</h3>
-            <div class="pasatiempos">
-                <label><input type="checkbox" name="pasatiempos" value="Fútbol"> Fútbol</label>
-                <label><input type="checkbox" name="pasatiempos" value="Lectura"> Lectura</label>
-                <label><input type="checkbox" name="pasatiempos" value="Cine"> Cine</label>
-                <label><input type="checkbox" name="pasatiempos" value="Música"> Música</label>
-            </div>
-
-            <label for="nivel_prog">Nivel de programación:</label>
-            <select id="nivel_prog" name="nivel_prog">
-                <option value="Principiante">Principiante</option>
-                <option value="Intermedio">Intermedio</option>
-                <option value="Avanzado">Avanzado</option>
-            </select>
-
-            <h3>¿Qué me gusta hacer?</h3>
-            <textarea name="me_gusta" rows="3" required></textarea>
-
-            <button type="submit">Registrar</button>
         </form>
-
-        <p><a href="/alumnos">Ver alumnos registrados</a></p>
     </div>
 </body>
+
 </html>

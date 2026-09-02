@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static',
+filename='css/estilos.css') }}">
+
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>Información del Cliente</h1>
+
+        <p class="subtitulo">
+            Datos recibidos por Flask
+        </p>
+        <!-- ===================================== -->
+        <!-- DATOS PERSONALES -->
+        <!-- ===================================== -->
+        <h2>Datos personales</h2>
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ nombre }}</td>
+            </tr>
+            <tr>
+                <th>Apellido paterno</th>
+                <td>{{ apellido_paterno }}</td>
+            </tr>
+            <tr>
+                <th>Apellido materno</th>
+                <td>{{ apellido_materno }}</td>
+            </tr>
+            <tr>
+                <th>Fecha de nacimiento</th>
+                <td>{{ fecha_nacimiento }}</td>
+            </tr>
+            <tr>
+                <th>Género</th>
+                <td>{{ genero }}</td>
+            </tr>
+        </table>
+        <!-- ===================================== -->
+        <!-- CONTACTO -->
+        <!-- ===================================== -->
+        <h2>Datos de contacto</h2>
+        <table>
+            <tr>
+                <th>Correo</th>
+                <td>{{ correo }}</td>
+            </tr>
+            <tr>
+                <th>Teléfono</th>
+                <td>{{ telefono }}</td>
+            </tr>
+        </table>
+        <!-- ===================================== -->
+
+        <!-- UBICACIÓN -->
+        <!-- ===================================== -->
+        <h2>Ubicación</h2>
+        <table>
+            <tr>
+                <th>Estado</th>
+                <td>{{ estado }}</td>
+            </tr>
+            <tr>
+                <th>Ciudad</th>
+                <td>{{ ciudad }}</td>
+            </tr>
+            <tr>
+                <th>Código postal</th>
+                <td>{{ codigo_postal }}</td>
+            </tr>
+        </table>
+        <!-- ===================================== -->
+        <!-- INFORMACIÓN COMERCIAL -->
+        <!-- ===================================== -->
+        <h2>Información comercial</h2>
+        <table>
+            <tr>
+                <th>Tipo de cliente</th>
+                <td>{{ tipo_cliente }}</td>
+            </tr>
+            <tr>
+                <th>Límite de crédito</th>
+                <td>$ {{ limite_credito }}</td>
+            </tr>
+            <tr>
+                <th>Intereses</th>
+                <td>
+                    {% if intereses %}
+                    <ul>
+                        {% for interes in intereses %}
+                        <li>{{ interes }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    Sin intereses seleccionados
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <th>Observaciones</th>
+                <td>{{ observaciones }}</td>
+            </tr>
+        </table>
+        <div class="botones">
+            <a href="/" class="boton">
+                Registrar otro cliente
+            </a>
+            <a href="/clientes" class="boton">
+                Listar clientes
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
