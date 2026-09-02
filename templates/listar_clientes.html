@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Clientes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <style>
+        /* Forzamos el color de texto e interlineado para la tabla de clientes */
+        table, th, td {
+            color: #222222 !important;
+        }
+        th {
+            background-color: #f2f2f2 !important;
+            font-weight: bold;
+        }
+        td {
+            background-color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -14,45 +27,45 @@
         <p class="subtitulo">Registros almacenados en MySQL</p>
 
         {% if clientes %}
-        <div class="tabla-contenedor">
-            <table>
+        <div class="tabla-contenedor" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; color: #333;">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Apellido paterno</th>
-                        <th>Apellido materno</th>
-                        <th>Fecha nacimiento</th>
-                        <th>Género</th>
-                        <th>Correo</th>
-                        <th>Teléfono</th>
-                        <th>Estado</th>
-                        <th>Ciudad</th>
-                        <th>C.P.</th>
-                        <th>Tipo cliente</th>
-                        <th>Intereses</th>
-                        <th>Límite crédito</th>
-                        <th>Observaciones</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">ID</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Nombre</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Apellido paterno</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Apellido materno</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Fecha nacimiento</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Género</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Correo</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Teléfono</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Estado</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Ciudad</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">C.P.</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Tipo cliente</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Intereses</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Límite crédito</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Observaciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for c in clientes %}
                     <tr>
-                        <td>{{ c['id'] }}</td>
-                        <td>{{ c['nombre'] }}</td>
-                        <td>{{ c['apellido_paterno'] }}</td>
-                        <td>{{ c['apellido_materno'] }}</td>
-                        <td>{{ c['fecha_nacimiento'] }}</td>
-                        <td>{{ c['genero'] }}</td>
-                        <td>{{ c['correo'] }}</td>
-                        <td>{{ c['telefono'] }}</td>
-                        <td>{{ c['estado'] }}</td>
-                        <td>{{ c['ciudad'] }}</td>
-                        <td>{{ c['codigo_postal'] }}</td>
-                        <td>{{ c['tipo_cliente'] }}</td>
-                        <td>{{ c['intereses'] }}</td>
-                        <td>$ {{ c['limite_credito'] }}</td>
-                        <td>{{ c['observaciones'] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['id'] if c['id'] is defined else c[0] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['nombre'] if c['nombre'] is defined else c[1] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['apellido_paterno'] if c['apellido_paterno'] is defined else c[2] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['apellido_materno'] if c['apellido_materno'] is defined else c[3] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['fecha_nacimiento'] if c['fecha_nacimiento'] is defined else c[4] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['genero'] if c['genero'] is defined else c[5] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['correo'] if c['correo'] is defined else c[6] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['telefono'] if c['telefono'] is defined else c[7] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['estado'] if c['estado'] is defined else c[8] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['ciudad'] if c['ciudad'] is defined else c[9] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['codigo_postal'] if c['codigo_postal'] is defined else c[10] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['tipo_cliente'] if c['tipo_cliente'] is defined else c[11] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['intereses'] if c['intereses'] is defined else c[12] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">$ {{ c['limite_credito'] if c['limite_credito'] is defined else c[13] }}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: #000;">{{ c['observaciones'] if c['observaciones'] is defined else c[14] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
