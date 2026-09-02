@@ -118,7 +118,6 @@ def listar_clientes():
     conexion.close()
 
     return render_template("listar_clientes.html", clientes=clientes)
-
 # =========================================================
 # EJECUCIÓN DEL SERVIDOR
 # =========================================================
