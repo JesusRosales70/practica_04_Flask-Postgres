@@ -18,18 +18,31 @@ DB_NAME = os.environ.get("DB_NAME", "practica_db")
 DB_PORT = int(os.environ.get("DB_PORT", 5432))
 
 def obtener_conexion():
-    if DATABASE_URL:
-        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor, sslmode="require")
-    else:
-        return psycopg2.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            dbname=DB_NAME,
-            port=DB_PORT,
-            sslmode="require",
-            cursor_factory=RealDictCursor
-        )
+    url = os.environ.get("DATABASE_URL")
+    
+    # Si existe la URL completa (Clever Cloud)
+    if url:
+        # PostgreSQL moderno exige 'postgresql://' en lugar de 'postgres://'
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        
+        # Agrega sslmode=require si no viene en la URL
+        if "sslmode" not in url:
+            conector = "&" if "?" in url else "?"
+            url = f"{url}{conector}sslmode=require"
+            
+        return psycopg2.connect(url, cursor_factory=RealDictCursor)
+    
+    # Si se usan variables separadas
+    return psycopg2.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        dbname=DB_NAME,
+        port=DB_PORT,
+        sslmode="require",
+        cursor_factory=RealDictCursor
+    )
 
 def crear_tabla_clientes():
     conexion = obtener_conexion()
