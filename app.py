@@ -8,7 +8,6 @@ app = Flask(__name__)
 # =========================================================
 # CONFIGURACIÓN DE CONEXIÓN A POSTGRESQL
 # =========================================================
-# Intenta tomar la URL directa (si la provee la plataforma) o usa variables individuales
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 DB_HOST = os.environ.get("DB_HOST", "localhost")
@@ -20,20 +19,20 @@ DB_PORT = int(os.environ.get("DB_PORT", 5432))
 def obtener_conexion():
     url = os.environ.get("DATABASE_URL")
     
-    # Si existe la URL completa (Clever Cloud)
+    # Si existe la URL completa (proporcionada por Clever Cloud o Render)
     if url:
         # PostgreSQL moderno exige 'postgresql://' en lugar de 'postgres://'
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         
-        # Agrega sslmode=require si no viene en la URL
+        # Garantiza el modo SSL habilitado en la cadena
         if "sslmode" not in url:
             conector = "&" if "?" in url else "?"
             url = f"{url}{conector}sslmode=require"
             
         return psycopg2.connect(url, cursor_factory=RealDictCursor)
     
-    # Si se usan variables separadas
+    # Si se usan las variables individuales por separado
     return psycopg2.connect(
         host=DB_HOST,
         user=DB_USER,
@@ -69,12 +68,12 @@ def crear_tabla_clientes():
     conexion.commit()
     conexion.close()
 
-# Ejecuta la verificación/creación de la tabla al arrancar el contexto de la app
+# Ejecuta la creación/verificación automática de la tabla al iniciar la app
 with app.app_context():
     try:
         crear_tabla_clientes()
     except Exception as e:
-        print(f"Error al verificar la tabla PostgreSQL: {e}")
+        print(f"Error al verificar/crear la tabla PostgreSQL: {e}")
 
 # =========================================================
 # RUTAS DE LA APLICACIÓN
@@ -85,15 +84,19 @@ def inicio():
 
 @app.route("/mostrar_cliente", methods=["GET", "POST"])
 def mostrar_cliente():
-    # Si intentan entrar directo escribiendo la URL (GET), redirige a inicio
+    # Si intentan ingresar directo escribiendo la URL por GET, redirige al inicio
     if request.method == "GET":
         return redirect(url_for("inicio"))
 
-    # Si vienen de enviar el formulario (POST), procesa los datos e inserta en la BD
+    # Recolección de datos del formulario
     nombre = request.form.get("nombre")
     apellido_paterno = request.form.get("apellido_paterno")
     apellido_materno = request.form.get("apellido_materno")
-    fecha_nacimiento = request.form.get("fecha_nacimiento")
+    
+    # Manejo estricto de fechas: Si el string viene vacío (""), se envía None (NULL en SQL)
+    fecha_nacimiento_raw = request.form.get("fecha_nacimiento")
+    fecha_nacimiento = fecha_nacimiento_raw if fecha_nacimiento_raw else None
+
     genero = request.form.get("genero", "")
     correo = request.form.get("correo")
     telefono = request.form.get("telefono")
@@ -103,24 +106,36 @@ def mostrar_cliente():
     tipo_cliente = request.form.get("tipo_cliente")
     intereses = request.form.getlist("intereses")
     intereses_texto = ", ".join(intereses)
-    limite_credito = request.form.get("limite_credito") or 0
+    
+    # Manejo estricto del campo numérico decimal
+    limite_credito_raw = request.form.get("limite_credito")
+    try:
+        limite_credito = float(limite_credito_raw) if limite_credito_raw else 0.0
+    except ValueError:
+        limite_credito = 0.0
+
     observaciones = request.form.get("observaciones")
 
-    conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        sql = """
-            INSERT INTO clientes 
-            (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, correo, telefono, estado, ciudad, codigo_postal, tipo_cliente, intereses, limite_credito, observaciones)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(sql, (
-            nombre, apellido_paterno, apellido_materno,
-            fecha_nacimiento if fecha_nacimiento else None, genero,
-            correo, telefono, estado, ciudad, codigo_postal, tipo_cliente,
-            intereses_texto, limite_credito, observaciones
-        ))
-    conexion.commit()
-    conexion.close()
+    # Inserción en la base de datos
+    try:
+        conexion = obtener_conexion()
+        with conexion.cursor() as cursor:
+            sql = """
+                INSERT INTO clientes 
+                (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, correo, telefono, estado, ciudad, codigo_postal, tipo_cliente, intereses, limite_credito, observaciones)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(sql, (
+                nombre, apellido_paterno, apellido_materno,
+                fecha_nacimiento, genero,
+                correo, telefono, estado, ciudad, codigo_postal, tipo_cliente,
+                intereses_texto, limite_credito, observaciones
+            ))
+        conexion.commit()
+        conexion.close()
+    except Exception as e:
+        print(f"Error en la BD: {e}")
+        return f"<h3>Error al guardar en PostgreSQL:</h3><p>{e}</p>", 500
 
     return render_template(
         "mostrar_cliente.html",
@@ -167,13 +182,15 @@ def listar_clientes():
             """
             cursor.execute(sql)
             clientes = cursor.fetchall()
+    except Exception as e:
+        return f"<h3>Error al consultar PostgreSQL:</h3><p>{e}</p>", 500
     finally:
         conexion.close()
 
     return render_template("listar_clientes.html", clientes=clientes)
 
 # =========================================================
-# EJECUCIÓN DEL SERVIDOR LOCAL
+# EJECUCIÓN DEL SERVIDOR
 # =========================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
