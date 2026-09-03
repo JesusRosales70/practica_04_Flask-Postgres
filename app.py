@@ -1,27 +1,28 @@
 from flask import Flask, render_template, request
-import pymysql
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 
 app = Flask(__name__)
 
 # =========================================================
-# CONFIGURACIÓN DE CONEXIÓN A MYSQL
+# CONFIGURACIÓN DE CONEXIÓN A POSTGRESQL
 # En local usa valores por defecto; en la nube toma las variables de entorno.
 # =========================================================
 DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_USER = os.environ.get("DB_USER", "root")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
 DB_NAME = os.environ.get("DB_NAME", "practica_db")
-DB_PORT = int(os.environ.get("DB_PORT", 3306))
+DB_PORT = int(os.environ.get("DB_PORT", 5432))
 
 def obtener_conexion():
-    return pymysql.connect(
+    return psycopg2.connect(
         host=DB_HOST,
         user=DB_USER,
         password=DB_PASSWORD,
-        database=DB_NAME,
+        dbname=DB_NAME,
         port=DB_PORT,
-        cursorclass=pymysql.cursors.DictCursor
+        cursor_factory=RealDictCursor
     )
 
 def crear_tabla_clientes():
@@ -29,7 +30,7 @@ def crear_tabla_clientes():
     with conexion.cursor() as cursor:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS clientes (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 nombre VARCHAR(100) NOT NULL,
                 apellido_paterno VARCHAR(100),
                 apellido_materno VARCHAR(100),
@@ -42,19 +43,19 @@ def crear_tabla_clientes():
                 codigo_postal VARCHAR(10),
                 tipo_cliente VARCHAR(50),
                 intereses TEXT,
-                limite_credito DECIMAL(10,2),
+                limite_credito NUMERIC(10,2),
                 observaciones TEXT
             )
         """)
     conexion.commit()
     conexion.close()
 
-# Ejecuta la verificación de la tabla al iniciar la app
+# Ejecuta la verificación/creación de la tabla al arrancar el contexto de la app
 with app.app_context():
     try:
         crear_tabla_clientes()
     except Exception as e:
-        print(f"Error al verificar la tabla: {e}")
+        print(f"Error al verificar la tabla PostgreSQL: {e}")
 
 # =========================================================
 # RUTAS DE LA APLICACIÓN
@@ -65,7 +66,6 @@ def inicio():
 
 @app.route("/mostrar_cliente", methods=["POST"])
 def mostrar_cliente():
-    # Recepción de datos del formulario
     nombre = request.form.get("nombre")
     apellido_paterno = request.form.get("apellido_paterno")
     apellido_materno = request.form.get("apellido_materno")
@@ -79,10 +79,9 @@ def mostrar_cliente():
     tipo_cliente = request.form.get("tipo_cliente")
     intereses = request.form.getlist("intereses")
     intereses_texto = ", ".join(intereses)
-    limite_credito = request.form.get("limite_credito")
+    limite_credito = request.form.get("limite_credito") or 0
     observaciones = request.form.get("observaciones")
 
-    # Guardar en MySQL
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         sql = """
@@ -91,7 +90,8 @@ def mostrar_cliente():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, (
-            nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero,
+            nombre, apellido_paterno, apellido_materno,
+            fecha_nacimiento if fecha_nacimiento else None, genero,
             correo, telefono, estado, ciudad, codigo_postal, tipo_cliente,
             intereses_texto, limite_credito, observaciones
         ))
@@ -121,8 +121,27 @@ def listar_clientes():
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            # Trae todos los campos de clientes
-            cursor.execute("SELECT * FROM clientes ORDER BY 1")
+            sql = """
+                SELECT 
+                    id,
+                    COALESCE(nombre, '') AS nombre,
+                    COALESCE(apellido_paterno, '') AS apellido_paterno,
+                    COALESCE(apellido_materno, '') AS apellido_materno,
+                    COALESCE(TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD'), '') AS fecha_nacimiento,
+                    COALESCE(genero, '') AS genero,
+                    COALESCE(correo, '') AS correo,
+                    COALESCE(telefono, '') AS telefono,
+                    COALESCE(estado, '') AS estado,
+                    COALESCE(ciudad, '') AS ciudad,
+                    COALESCE(codigo_postal, '') AS codigo_postal,
+                    COALESCE(tipo_cliente, '') AS tipo_cliente,
+                    COALESCE(intereses, '') AS intereses,
+                    COALESCE(limite_credito, 0) AS limite_credito,
+                    COALESCE(observaciones, '') AS observaciones
+                FROM clientes
+                ORDER BY id ASC
+            """
+            cursor.execute(sql)
             clientes = cursor.fetchall()
     finally:
         conexion.close()
