@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
@@ -7,8 +7,10 @@ app = Flask(__name__)
 
 # =========================================================
 # CONFIGURACIÓN DE CONEXIÓN A POSTGRESQL
-# En local usa valores por defecto; en la nube toma las variables de entorno.
 # =========================================================
+# Intenta tomar la URL directa (si la provee la plataforma) o usa variables individuales
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
@@ -16,14 +18,19 @@ DB_NAME = os.environ.get("DB_NAME", "practica_db")
 DB_PORT = int(os.environ.get("DB_PORT", 5432))
 
 def obtener_conexion():
-    return psycopg2.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        dbname=DB_NAME,
-        port=DB_PORT,
-        cursor_factory=RealDictCursor
-    )
+    if DATABASE_URL:
+        # Si existe DATABASE_URL, se conecta usando la cadena completa
+        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    else:
+        # De lo contrario usa los parámetros individuales
+        return psycopg2.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            dbname=DB_NAME,
+            port=DB_PORT,
+            cursor_factory=RealDictCursor
+        )
 
 def crear_tabla_clientes():
     conexion = obtener_conexion()
@@ -64,8 +71,13 @@ with app.app_context():
 def inicio():
     return render_template("index.html")
 
-@app.route("/mostrar_cliente", methods=["POST"])
+@app.route("/mostrar_cliente", methods=["GET", "POST"])
 def mostrar_cliente():
+    # Si intentan entrar directo escribiendo la URL (GET), redirige a inicio
+    if request.method == "GET":
+        return redirect(url_for("inicio"))
+
+    # Si vienen de enviar el formulario (POST), procesa los datos e inserta en la BD
     nombre = request.form.get("nombre")
     apellido_paterno = request.form.get("apellido_paterno")
     apellido_materno = request.form.get("apellido_materno")
