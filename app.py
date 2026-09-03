@@ -19,16 +19,15 @@ DB_PORT = int(os.environ.get("DB_PORT", 5432))
 
 def obtener_conexion():
     if DATABASE_URL:
-        # Si existe DATABASE_URL, se conecta usando la cadena completa
-        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor, sslmode="require")
     else:
-        # De lo contrario usa los parámetros individuales
         return psycopg2.connect(
             host=DB_HOST,
             user=DB_USER,
             password=DB_PASSWORD,
             dbname=DB_NAME,
             port=DB_PORT,
+            sslmode="require",
             cursor_factory=RealDictCursor
         )
 
