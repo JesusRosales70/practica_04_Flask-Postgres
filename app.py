@@ -19,16 +19,20 @@ DB_PORT = int(os.environ.get("DB_PORT", 5432))
 def obtener_conexion():
     url = os.environ.get("DATABASE_URL")
     
+    # Si existe la URL completa (proporcionada por Clever Cloud o Render)
     if url:
+        # Reemplazar la sintaxis obsoleta 'postgres://' por 'postgresql://'
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         
+        # Forzar el parámetro sslmode
         if "sslmode" not in url:
             conector = "&" if "?" in url else "?"
             url = f"{url}{conector}sslmode=require"
             
-        return psycopg2.connect(url, cursor_factory=RealDictCursor, connect_timeout=5)
+        return psycopg2.connect(url, cursor_factory=RealDictCursor, connect_timeout=3)
     
+    # Si se usan variables de entorno separadas
     return psycopg2.connect(
         host=DB_HOST,
         user=DB_USER,
@@ -37,40 +41,43 @@ def obtener_conexion():
         port=DB_PORT,
         sslmode="require",
         cursor_factory=RealDictCursor,
-        connect_timeout=5
+        connect_timeout=3
     )
 
 def crear_tabla_clientes():
-    conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS clientes (
-                id SERIAL PRIMARY KEY,
-                nombre VARCHAR(100) NOT NULL,
-                apellido_paterno VARCHAR(100),
-                apellido_materno VARCHAR(100),
-                fecha_nacimiento DATE,
-                genero VARCHAR(20),
-                correo VARCHAR(100),
-                telefono VARCHAR(20),
-                estado VARCHAR(50),
-                ciudad VARCHAR(50),
-                codigo_postal VARCHAR(10),
-                tipo_cliente VARCHAR(50),
-                intereses TEXT,
-                limite_credito NUMERIC(10,2),
-                observaciones TEXT
-            )
-        """)
-    conexion.commit()
-    conexion.close()
-
-# Ejecuta la creación/verificación automática de la tabla al iniciar la app
-with app.app_context():
+    conexion = None
     try:
-        crear_tabla_clientes()
+        conexion = obtener_conexion()
+        with conexion.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS clientes (
+                    id SERIAL PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL,
+                    apellido_paterno VARCHAR(100),
+                    apellido_materno VARCHAR(100),
+                    fecha_nacimiento DATE,
+                    genero VARCHAR(20),
+                    correo VARCHAR(100),
+                    telefono VARCHAR(20),
+                    estado VARCHAR(50),
+                    ciudad VARCHAR(50),
+                    codigo_postal VARCHAR(10),
+                    tipo_cliente VARCHAR(50),
+                    intereses TEXT,
+                    limite_credito NUMERIC(10,2),
+                    observaciones TEXT
+                )
+            """)
+        conexion.commit()
     except Exception as e:
         print(f"Error al verificar/crear la tabla PostgreSQL: {e}")
+    finally:
+        if conexion:
+            conexion.close()
+
+# Verificación/creación de la tabla al iniciar la app
+with app.app_context():
+    crear_tabla_clientes()
 
 # =========================================================
 # RUTAS DE LA APLICACIÓN
@@ -81,16 +88,16 @@ def inicio():
 
 @app.route("/mostrar_cliente", methods=["GET", "POST"])
 def mostrar_cliente():
-    # Si intentan ingresar directo escribiendo la URL por GET, redirige al inicio
+    # Si intentan acceder directamente por GET, redirige al formulario
     if request.method == "GET":
         return redirect(url_for("inicio"))
 
-    # Recolección de datos del formulario
+    # Recolección y formateo de datos del formulario
     nombre = request.form.get("nombre")
     apellido_paterno = request.form.get("apellido_paterno")
     apellido_materno = request.form.get("apellido_materno")
     
-    # Manejo estricto de fechas: Si el string viene vacío (""), se envía None (NULL en SQL)
+    # Si la fecha viene vacía, asigna None para insertar NULL en PostgreSQL
     fecha_nacimiento_raw = request.form.get("fecha_nacimiento")
     fecha_nacimiento = fecha_nacimiento_raw if fecha_nacimiento_raw else None
 
@@ -104,7 +111,7 @@ def mostrar_cliente():
     intereses = request.form.getlist("intereses")
     intereses_texto = ", ".join(intereses)
     
-    # Manejo estricto del campo numérico decimal
+    # Sanitización del valor numérico
     limite_credito_raw = request.form.get("limite_credito")
     try:
         limite_credito = float(limite_credito_raw) if limite_credito_raw else 0.0
@@ -113,7 +120,7 @@ def mostrar_cliente():
 
     observaciones = request.form.get("observaciones")
 
-    # Inserción en la base de datos
+    conexion = None
     try:
         conexion = obtener_conexion()
         with conexion.cursor() as cursor:
@@ -129,10 +136,12 @@ def mostrar_cliente():
                 intereses_texto, limite_credito, observaciones
             ))
         conexion.commit()
-        conexion.close()
     except Exception as e:
         print(f"Error en la BD: {e}")
         return f"<h3>Error al guardar en PostgreSQL:</h3><p>{e}</p>", 500
+    finally:
+        if conexion:
+            conexion.close()  # Libera la conexión de forma inmediata
 
     return render_template(
         "mostrar_cliente.html",
@@ -154,8 +163,10 @@ def mostrar_cliente():
 
 @app.route("/clientes")
 def listar_clientes():
-    conexion = obtener_conexion()
+    conexion = None
+    clientes = []
     try:
+        conexion = obtener_conexion()
         with conexion.cursor() as cursor:
             sql = """
                 SELECT 
@@ -182,12 +193,13 @@ def listar_clientes():
     except Exception as e:
         return f"<h3>Error al consultar PostgreSQL:</h3><p>{e}</p>", 500
     finally:
-        conexion.close()
+        if conexion:
+            conexion.close()  # Libera la conexión de forma inmediata
 
     return render_template("listar_clientes.html", clientes=clientes)
 
 # =========================================================
-# EJECUCIÓN DEL SERVIDOR
+# EJECUCIÓN DEL SERVIDOR LOCAL
 # =========================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
