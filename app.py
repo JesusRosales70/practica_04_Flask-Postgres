@@ -66,7 +66,7 @@ def crear_tabla_clientes():
                     intereses TEXT,
                     limite_credito NUMERIC(10,2),
                     observaciones TEXT
-                )
+                );
             """)
         conexion.commit()
     except Exception as e:
@@ -75,7 +75,7 @@ def crear_tabla_clientes():
         if conexion:
             conexion.close()
 
-# Verificación/creación de la tabla al iniciar la app
+# Intentar crear la tabla al arrancar el contexto de la aplicación
 with app.app_context():
     crear_tabla_clientes()
 
@@ -91,6 +91,9 @@ def mostrar_cliente():
     # Si intentan acceder directamente por GET, redirige al formulario
     if request.method == "GET":
         return redirect(url_for("inicio"))
+
+    # Garantizar que la tabla exista antes de intentar insertar
+    crear_tabla_clientes()
 
     # Recolección y formateo de datos del formulario
     nombre = request.form.get("nombre")
@@ -163,6 +166,9 @@ def mostrar_cliente():
 
 @app.route("/clientes")
 def listar_clientes():
+    # Garantizar que la tabla exista antes de listar los registros
+    crear_tabla_clientes()
+
     conexion = None
     clientes = []
     try:
