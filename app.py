@@ -38,7 +38,7 @@ def obtener_conexion():
         password=os.getenv("DB_LOCAL_PASSWORD"),
         sslmode="require",
         cursor_factory=RealDictCursor,
-        connect_timeout=10,
+        connect_timeout=30,
     )
 
 
