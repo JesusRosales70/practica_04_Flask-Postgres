@@ -1,55 +1,46 @@
-from flask import Flask, render_template, request, redirect, url_for
+import os
+from dotenv import load_dotenv
+from flask import Flask, redirect, render_template, request, url_for
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
-import os
 
-# Cargar variables del archivo .env
+# Cargar variables de entorno del archivo .env
 load_dotenv()
 
 app = Flask(__name__)
 
+
 # =========================================================
 # CONFIGURACIÓN DE CONEXIÓN A POSTGRESQL
 # =========================================================
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-load_dotenv()
-conexion = psycopg2.connect(
-host=os.getenv("DB_LOCAL_HOST"),
-port=os.getenv("DB_LOCAL_PORT"),
-database=os.getenv("DB_LOCAL_NAME"),
-user=os.getenv("DB_LOCAL_USER"),
-password=os.getenv("DB_LOCAL_PASSWORD")
-)
-
 def obtener_conexion():
     url = os.environ.get("DATABASE_URL")
-    
-    # Si existe la URL completa (proporcionada por Clever Cloud o Render)
+
+    # Si existe la URL completa (proporcionada por Render o Aiven)
     if url:
-        # Reemplazar la sintaxis obsoleta 'postgres://' por 'postgresql://'
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
-        
-        # Forzar el parámetro sslmode
+
         if "sslmode" not in url:
             conector = "&" if "?" in url else "?"
             url = f"{url}{conector}sslmode=require"
-            
-        return psycopg2.connect(url, cursor_factory=RealDictCursor, connect_timeout=3)
-    
-    # Si se usan variables de entorno separadas
+
+        return psycopg2.connect(
+            url, cursor_factory=RealDictCursor, connect_timeout=5
+        )
+
+    # Conexión local usando las variables con prefijo DB_LOCAL_
     return psycopg2.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        dbname=DB_NAME,
-        port=DB_PORT,
+        host=os.getenv("DB_LOCAL_HOST"),
+        port=os.getenv("DB_LOCAL_PORT", "13040"),
+        database=os.getenv("DB_LOCAL_NAME"),
+        user=os.getenv("DB_LOCAL_USER"),
+        password=os.getenv("DB_LOCAL_PASSWORD"),
         sslmode="require",
         cursor_factory=RealDictCursor,
-        connect_timeout=3
+        connect_timeout=5,
     )
+
 
 def crear_tabla_clientes():
     conexion = None
@@ -82,9 +73,11 @@ def crear_tabla_clientes():
         if conexion:
             conexion.close()
 
+
 # Intentar crear la tabla al arrancar el contexto de la aplicación
 with app.app_context():
     crear_tabla_clientes()
+
 
 # =========================================================
 # RUTAS DE LA APLICACIÓN
@@ -93,23 +86,22 @@ with app.app_context():
 def inicio():
     return render_template("index.html")
 
+
 @app.route("/mostrar_cliente", methods=["GET", "POST"])
 def mostrar_cliente():
-    # Si intentan acceder directamente por GET, redirige al formulario
     if request.method == "GET":
         return redirect(url_for("inicio"))
 
-    # Garantizar que la tabla exista antes de intentar insertar
     crear_tabla_clientes()
 
-    # Recolección y formateo de datos del formulario
     nombre = request.form.get("nombre")
     apellido_paterno = request.form.get("apellido_paterno")
     apellido_materno = request.form.get("apellido_materno")
-    
-    # Si la fecha viene vacía, asigna None para insertar NULL en PostgreSQL
+
     fecha_nacimiento_raw = request.form.get("fecha_nacimiento")
-    fecha_nacimiento = fecha_nacimiento_raw if fecha_nacimiento_raw else None
+    fecha_nacimiento = (
+        fecha_nacimiento_raw if fecha_nacimiento_raw else None
+    )
 
     genero = request.form.get("genero", "")
     correo = request.form.get("correo")
@@ -120,11 +112,12 @@ def mostrar_cliente():
     tipo_cliente = request.form.get("tipo_cliente")
     intereses = request.form.getlist("intereses")
     intereses_texto = ", ".join(intereses)
-    
-    # Sanitización del valor numérico
+
     limite_credito_raw = request.form.get("limite_credito")
     try:
-        limite_credito = float(limite_credito_raw) if limite_credito_raw else 0.0
+        limite_credito = (
+            float(limite_credito_raw) if limite_credito_raw else 0.0
+        )
     except ValueError:
         limite_credito = 0.0
 
@@ -139,19 +132,32 @@ def mostrar_cliente():
                 (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, correo, telefono, estado, ciudad, codigo_postal, tipo_cliente, intereses, limite_credito, observaciones)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(sql, (
-                nombre, apellido_paterno, apellido_materno,
-                fecha_nacimiento, genero,
-                correo, telefono, estado, ciudad, codigo_postal, tipo_cliente,
-                intereses_texto, limite_credito, observaciones
-            ))
+            cursor.execute(
+                sql,
+                (
+                    nombre,
+                    apellido_paterno,
+                    apellido_materno,
+                    fecha_nacimiento,
+                    genero,
+                    correo,
+                    telefono,
+                    estado,
+                    ciudad,
+                    codigo_postal,
+                    tipo_cliente,
+                    intereses_texto,
+                    limite_credito,
+                    observaciones,
+                ),
+            )
         conexion.commit()
     except Exception as e:
         print(f"Error en la BD: {e}")
         return f"<h3>Error al guardar en PostgreSQL:</h3><p>{e}</p>", 500
     finally:
         if conexion:
-            conexion.close()  # Libera la conexión de forma inmediata
+            conexion.close()
 
     return render_template(
         "mostrar_cliente.html",
@@ -168,12 +174,12 @@ def mostrar_cliente():
         tipo_cliente=tipo_cliente,
         intereses=intereses,
         limite_credito=limite_credito,
-        observaciones=observaciones
+        observaciones=observaciones,
     )
+
 
 @app.route("/clientes")
 def listar_clientes():
-    # Garantizar que la tabla exista antes de listar los registros
     crear_tabla_clientes()
 
     conexion = None
@@ -207,9 +213,10 @@ def listar_clientes():
         return f"<h3>Error al consultar PostgreSQL:</h3><p>{e}</p>", 500
     finally:
         if conexion:
-            conexion.close()  # Libera la conexión de forma inmediata
+            conexion.close()
 
     return render_template("listar_clientes.html", clientes=clientes)
+
 
 # =========================================================
 # EJECUCIÓN DEL SERVIDOR LOCAL
