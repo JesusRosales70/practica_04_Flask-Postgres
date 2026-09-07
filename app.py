@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
 import os
+
+# Cargar variables del archivo .env
+load_dotenv()
 
 app = Flask(__name__)
 
