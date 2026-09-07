@@ -14,11 +14,14 @@ app = Flask(__name__)
 # =========================================================
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_USER = os.environ.get("DB_USER", "postgres")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
-DB_NAME = os.environ.get("DB_NAME", "practica_db")
-DB_PORT = int(os.environ.get("DB_PORT", 5432))
+load_dotenv()
+conexion = psycopg2.connect(
+host=os.getenv("DB_LOCAL_HOST"),
+port=os.getenv("DB_LOCAL_PORT"),
+database=os.getenv("DB_LOCAL_NAME"),
+user=os.getenv("DB_LOCAL_USER"),
+password=os.getenv("DB_LOCAL_PASSWORD")
+)
 
 def obtener_conexion():
     url = os.environ.get("DATABASE_URL")
